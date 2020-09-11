@@ -15,6 +15,10 @@ document.addEventListener('click', function (e) {
   }
 });
 
+chrome.runtime.onMessage.addListener(function () {
+  refreshStockUI();
+});
+
 function getColor(change) {
   if (change > 0.)
     return "red";
@@ -44,7 +48,7 @@ function refreshStockUI() {
   });
 }
 
-chrome.storage.onChanged.addListener(function (changes, areaName) {
-  console.log(Date.now(), changes, areaName);
-  refreshStockUI();
-});
+// chrome.storage.onChanged.addListener(function (changes, areaName) {
+//   console.log(Date.now(), changes, areaName);
+//   refreshStockUI();
+// });

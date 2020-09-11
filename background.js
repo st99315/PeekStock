@@ -4,7 +4,7 @@ function addStock(stockID) {
   if (stockID) {
     chrome.storage.local.get(stockID, function (data) {
       if (typeof data[stockID] == 'undefined') {
-        var defaultValue = { name: stockID, currentPrice: "-", change: "-" };
+        var defaultValue = {name: stockID, currentPrice: "-", change: "-", time: "-"};
         data[stockID] = defaultValue;
         chrome.storage.local.set(data);
       }
@@ -37,21 +37,18 @@ function updateStock() {
           console.log(stockArray.queryTime)
 
           $.each(stockArray.msgArray, function (index, stock) {
-            console.log(stock.c, stock.n, stock.t)
-            
             if (stock.z != '-') {
               let changePercent = (stock.z == stock.y) ? 0.0 : (stock.z - stock.y) / stock.y * 100;
               let updateValue = {name: stock.n, currentPrice: stock.z, change: String(changePercent.toFixed(2)), time: stock.t};
               stockData[stock.c] = updateValue;
             }
           });
-          chrome.storage.local.set(stockData, function () {
-            console.log('set', Date.now());
-          });
+          chrome.storage.local.set(stockData);
         }
       }
     });
   });
+  chrome.runtime.sendMessage({action: "refresh"});
 }
 
 function clearLocalStorage() {
