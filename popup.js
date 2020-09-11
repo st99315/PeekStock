@@ -1,35 +1,50 @@
 var bg = chrome.extension.getBackgroundPage();
 
 $(document).ready(function () {
-  updateStockTable();
-})
+  refreshStockUI();
+});
 
 document.addEventListener('click', function (e) {
-  if (e.target.id == 'remove') {
-    bg.removeStock(e.target.value);
-    location.reload();
-  }
-  if (e.target.id == 'add') {
-    var stockID = document.getElementById("stockID").value;
-    bg.addStock(stockID);
+  switch (e.target.id) {
+    case 'add':
+      bg.addStock(document.getElementById("stockID").value);
+      break;
+    case 'remove':
+      bg.removeStock(e.target.value);
+      location.reload();
   }
 });
 
-function updateStockTable() {
+function getColor(change) {
+  if (change > 0.)
+    return "red";
+  else if (change < 0.)
+    return "green";
+  else if (change == 0.)
+    return "orange";
+  else
+    return"black";
+}
+
+function refreshStockUI() {
   chrome.storage.local.get(null, function (items) {
     let stockData = "";
-    let color = "black";
     for (key in items) {
-      if (items[key].change < 0)
-        color = "green"
-      if (items[key].change > 0)
-        color = "red"
-      stockData += `<tr align='center'><td>${items[key].name}</td><td>${items[key].currentPrice}</td><td><font color="${color}">${items[key].change}</td><td><button class="btn btn-outline-danger btn-sm" id='remove' value="${key}">Remove</button></td></tr>`;
+      let color = getColor(items[key].change);
+      stockData +=
+        `<tr align='center'>
+          <td>${items[key].name}</td>
+          <td>${items[key].currentPrice}</td>
+          <td><font color="${color}">${items[key].change}</td>
+          <td>${items[key].time}</td>
+          <td><button class="btn btn-outline-danger btn-sm" id='remove' value="${key}">Remove</button></td>
+        </tr>`;
     }
     document.getElementById("table_body").innerHTML = stockData;
   });
 }
 
 chrome.storage.onChanged.addListener(function (changes, areaName) {
-  updateStockTable();
+  console.log(Date.now(), changes, areaName);
+  refreshStockUI();
 });
